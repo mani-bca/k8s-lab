@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: myapp-deployment
+  labels:
+    app: myapp
+    type: front-end
+
+
+spec:
+  selector: 
+    matchLabels:
+      app: myapp
+  replicas: 3
+  template:
+    metadata: 
+      name: myapp-pod
+      labels:
+        app: myapp
+        type: front-end
+    spec:
+      containers:      
+      - name: nginx-container
+        image: nginx
+
+
+
+# kubectl get all
+
+# kubectl delete replicaset myapp-replicaset
+
+# kubectl edit replicasets.apps myapp-replicaset
+
+# kubectl delete replicationcontrollers myapp-rc
+
+# kubectl scale replicaset myapp-replicaset --replicas=2
+
+# kubectl scale --replicas=8 -f replica.yaml
+# kubectl replace -f replica.yaml

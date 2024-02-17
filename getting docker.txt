@@ -1,0 +1,139 @@
+docker image is a file that contains all the necessary dependencies and configurations which are required to run an application
+
+docker pull nginx
+
+docker images
+
+docker run -dt -p 8080:80 nginx
+44.204.4.42:8080
+
+docker ps 
+
+docker ps -a
+
+docker stop elated_morse 
+
+curl -I 44.204.4.42:8080
+
+docker start elated_morse
+
+netstat -ntlp
+
+**************** container identification 
+
+when you create a Docker container, it is assigned a universally unique identifier 
+(uuid)
+
+so we use container names, by default docker provides random names to the container
+
+docker run --name mojo -d -p 8000:80 nginx
+
+docker stop mojo
+
+**************** port binding
+
+By default, a Docker container can make connections to the outside world, but the outside world cannot connect to the container
+
+so we need to bind the port to the container and the container has a different IP address
+
+docker run --name mojo -d -p 8000:80 nginx
+
+docker inspect container-id
+
+**************** Attached and detached mode && removing container
+
+docker run -d --name attached1 -p 8081:80 nginx
+
+docker stop mojo 
+
+docker container ls -aq
+
+docker container stop $(docker container ls -aq)
+
+docker container rm mojo
+
+docker container rm $(docker container ls -aq)
+
+**************** EXEC command && -it flags
+
+the docker container exec command runs a new command in a running container
+
+only run while the container's primary process (PID1) is running
+
+docker container run -d --name docker-exec nginx
+
+/etc/init.d/nginx status
+
+apt-get update
+
+apt-get install net-tools
+
+netstat -ntlp
+
+if you want to run ntlp command outside the container
+
+docker container exec -it docker-exec netstat -ntlp
+
+--interactive flags keep stdin 
+
+--tty for terminal 
+
+**************** overriding default commands
+
+docker container run -d nginx sleep 60
+
+This overriding default command will change the initial command for example above we defined sleep 60 
+after the nginx image. once the 60 seconds are over the container will be stoped
+
+**************** restart policies && remove container
+
+By default, the docker container won't start when they exit or when the docker daemon is restarted
+
+so for this docker provides restart policies to control whether your container starts automatically
+when they exit or when the docker restart
+
+docker container run --restart unless-stopped -d --name docker-exec nginx
+
+docker rm docker-exec
+
+we should stop the container and then need to remove
+
+docker rm -f docker-exec
+
+**************** disk usage 
+
+df -h
+
+To see the docker container andd images storage usage
+
+docker system df
+
+Here we run busybox container and create bigfile to increase the storage
+
+docker exec -it busy sh
+
+dd if=/dev/zero of=bigfile.txt bs=1M count=500
+
+du -sh bigfile.txt
+
+it will show you per level component 
+
+docker system df -v
+
+**************** Automatically delete the exit container
+
+docker container run -dt --name testcon busybox ping -c10 google.com
+
+the above command to run the container 10 times ping google.com and exit the container
+
+docker container run --help | grep rm
+
+docker container run -dt --rm --name testcon2 busybox ping -c60 google.com
+
+With the --rm flag, the user can specify that whenever a container exits,
+it should automatically be removed.
+
+docker logs testcon2
+
+
+

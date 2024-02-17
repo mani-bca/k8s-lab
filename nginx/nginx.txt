@@ -1,0 +1,11 @@
+sudo apt install nginx
+
+sudo systemctl enable nginx
+
+ps -ef --forest | grep nginx
+
+ cat /var/log/nginx/ access.log  error.log
+
+        access_log /var/log/nginx/access.log;
+        error_log /var/log/nginx/error.log;
+

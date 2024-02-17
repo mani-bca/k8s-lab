@@ -1,0 +1,7 @@
+# FROM busybox
+# ENTRYPOINT [ "/bin/ping" ]
+# CMD [ "sh" ]
+
+FROM busybox
+ENTRYPOINT [ "/bin/ping" ]
+CMD [ "sh" ]

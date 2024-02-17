@@ -1,0 +1,4 @@
+FROM busybox
+ENV nginx=1.3
+RUN touch web-${nginx}.txt
+CMD [ "/bin/sh" ]

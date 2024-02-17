@@ -1,0 +1,6 @@
+docker pull ubuntu
+
+docker run -dit -p 8080:80 ubuntu:latest /bin/bash
+
+docker exec -it 6ecbc0a40ada bash
+

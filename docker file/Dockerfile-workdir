@@ -1,0 +1,14 @@
+# FROM busybox
+# RUN mkdir /root/demo
+# WORKDIR /root/demo
+# RUN touch file01.txt
+# CMD [ "/bin/sh" ]
+
+FROM busybox
+RUN mkdir -p /root/demo/con1/con2
+WORKDIR /root/demo
+# WORKDIR con1
+# WORKDIR con2
+RUN touch file01.txt
+CMD [ "/bin/sh" ]
+

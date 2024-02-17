@@ -1,0 +1,271 @@
+Every docker container is based on an image,custom images are build through Dockerfile
+
+sample Dockerfile
+
+->>
+     # Use the official Ubuntu as the base image
+     FROM ubuntu:latest
+     
+     # Install Nginx
+     RUN apt-get update && \
+         apt-get install -y nginx && \
+         rm -rf /var/lib/apt/lists/*
+     
+     # Expose port 80
+     #EXPOSE 80
+     
+     # Start Nginx when the container starts
+     CMD ["nginx", "-g", "daemon off;"]
+<--
+
+to build the dockerfile need to use the below command
+
+docker build -t ubuntu-nginx .
+
+docker container run -dt -p 80:80 ubuntu-nginx
+
+then we can check in browser ntlp or curl
+
+**************** dockerfile overview
+
+The format of Dockerfile is similar to the below syntax:
+
+# Comment
+INSTRUCTION arguments
+
+A Dockerfile must start with a FROM instruction.
+The FROM instruction specifies the Base Image from which you are building.
+
+
+/var/www/html/index.nginx-debian.html
+
+echo "this is mani site" > index.nginx-debian.html 
+
+nginx -g "daemon off;"
+
+docker build -t ubuntu-2n .
+
+docker container run -dt -p 8000:80 --name mojo ubuntu-2n
+
+**************** COPY and ADD && EXPOSE
+
+COPY and ADD are both Dockerfile instructions that serve similar purposes.
+
+ADD lets you do that too, but it also supports 2 other source
+
+-- >
+  FROM busybox
+COPY copy.txt /tmp
+ADD add.txt /tmp
+ADD add.txt.tar.gz /tmp
+CMD ["sh"]
+
+<--
+
+
+The EXPOSE instruction does not actually publish the port
+EXPOSE instruction informs Docker that the container listens on the specified network ports at runtime.
+
+
+**************** HEALTHCHECK Instruction &&  ENTRYPOINT Instruction
+
+HEALTHCHECK instruction Docker allows us to tell the platform on how to test that our application is healthy.
+
+When Docker starts a container, it monitors the process that the container runs. If the process ends, the container exits. 
+
+docker container run -dt --name busybox busybox sh
+
+ docker inspect busybox       ---get container ipaddres
+
+create new docker file with below 
+
+  FROM busybox
+  HEALTHCHECK --interval=5s CMD ping -c 1 172.17.0.2
+
+docker build -t montor .
+
+docker container run -dt --name mmonitor montor sh
+
+docker container stop busybox
+
+curl -f http://localhost:80/
+
+&&&&&&&&&  ENTRYPOINT Instruction
+
+The best use for ENTRYPOINT is to set the image’s main command
+
+ENTRYPOINT doesn’t allow you to override the command.
+
+
+**************** WORKDIR Instruction && ENV
+
+The WORKDIR instruction sets the working directory for any RUN, CMD, ENTRYPOINT, 
+COPY and ADD instructions that follow it in the Dockerfile
+
+
+docker build -t workdir .
+
+docker run -dt --name word workdir sh
+docker exec -it word sh
+
+docker build -t workdir2 .
+docker run -dt --name word2 workdir2 sh
+docker exec -it word2 sh
+
+
+The ENV instruction sets the environment variable <key> to the value <value>.
+
+ENV NGINX 1.2
+RUN curl -SL http://example.com/web-$NGINX.tar.xz
+RUN tar -xzvf web-$NGINX.tar.xz
+
+FROM busybox
+ENV nginx=1.3
+RUN touch web-${nginx}.txt
+CMD [ "/bin/sh" ]
+
+You can use -e, --env, and --env-file flags to set simple environment variables in the container you’re running or overwrite variables that are defined in the Dockerfile of the image you’re running.
+
+docker run -dt --name env2 --env USER=ADMINUSER busybox sh
+
+docker run -dt --name env image-env sh
+
+
+docker run --env VAR1=value1 --env VAR2=value2 ubuntu 
+
+docker run -dt --name env2 --env USER=ADMINUSER busybox sh
+echo $USER 
+
+****************  Tagging Docker Images && docker commit
+
+Docker tags convey useful information about a specific image version/variant.
+
+docker build -t custom-tags .
+
+docker tag 270886c4b36a demo:v2
+
+docker tag workdir:latest workdir:v2
+
+
+
+Whenever you make changes inside the container, it can be useful to commit a container’s file changes or settings into a new image.
+
+docker container commit CONTAINER-ID myimage01
+
+ docker run -dt --name mojss busybox
+ and edit something
+ docker container commit mojss  busyboxmodifed
+ docker run -dt --name custome busyboxmodifed 
+ docker container commit --change='CMD ["ash"]' mojss
+ docker run -dt --name custome2 021bc84c867f
+
+ ****************   Docker Image Layers &&   Managing Images with CLI && Inspecting Docker Images
+
+ A Docker image is built up from a series of layers. 
+All writes to the container that adds new or modifies existing data are stored in this writable layer. 
+
+Each layer represents an instruction in the image’s Dockerfile
+
+
+Docker CLI can be used to manage various aspects related to Docker Images which include building, removing, saving, tagging, and others.
+
+docker image build, history, import, inspect, load, ls, prune, pull, push rm, 
+
+
+A Docker Image contains lots of information, some of these  include:
+
+Creation Date, Command, Environment Variables, Architecture, OS, Size
+
+
+Tag Docker Image with Registry Repository and optional image tag.
+
+             docker tag busybox 5066/mydemo:v1
+
+Push Image using docker push command:
+
+              docker push 5066/mydemo:v1
+
+
+docker save busybox > busybox.tar
+
+docker load < busybox.tar
+
+
+layering cache
+
+Dockerfile
+
+FROM python:3.7-slim-buster
+COPY . .
+RUN pip install --quiet -r requirements.txt
+ENTRYPOINT ["python", "server.py"]
+
+requirements.txt
+
+certifi==2018.8.24
+chardet==3.0.4
+Click==7.0
+cycler==0.10.0
+decorator==4.3.0
+defusedxml==0.5.0
+
+Build Commands:
+
+docker build -t without-cache .
+docker build -t with-cache .
+
+********************************************************************************
+
+Docker takes care of the networking aspects so that containers can communicate with other containers and also with the Docker Host.
+
+**************** Bridge Networks
+
+A bridge network uses a software bridge that allows containers connected to the same 
+bridge network to communicate while providing isolation from containers which are not connected to that bridge network.
+
+  docker container run -dt --name bridge01 ubuntu
+
+docker inspect network bridge
+ docker network inspect bridge 
+
+  docker network ls
+  docker network create --driver bridge newbridge
+
+docker run -dt --name newbrifds --network newbridge ubuntu
+docker run -dt --name newbrifds2 --network newbridge ubuntu
+
+we can ping one container from another one in using same network
+
+brctl show
+
+**************** Host Network  && None Network
+
+This driver removes the network isolation between the docker host and the docker containers
+to use the host’s networking directly.
+
+if you run a container that binds to port 80 and you use host networking, the container’s application will
+be available on port 80 on the host’s IP address.
+
+
+If you want to completely disable the networking stack on a container, you can use the none network.
+
+This mode will not configure any IP for the container and doesn’t have any access to the external network as well as for other containers
+
+
+**************** Publishing Exposed Ports of Container &&  Legacy Approach for Linking Containers
+
+
+We were discussing an approach to publishing container port to host.
+
+docker container run -dt --name webserver -p 80:80 nginx
+
+There is also a second approach to publish all the exposed ports of the container.
+
+docker container run -dt --name webserver -P nginx
+
+
+
+The --link flag is a legacy feature of Docker. It may eventually be removed. 
+
+Unless you absolutely need to continue using it, we recommend that you use user-defined networks 
+to facilitate communication between two containers instead of using --link
